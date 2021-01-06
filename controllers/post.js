@@ -1,4 +1,5 @@
 const createError = require('http-errors');
+const { body, validationResult } = require('express-validator');
 
 const Post = require('../models/post');
 
@@ -18,5 +19,24 @@ module.exports = {
         post: post
       });
     });
-  }
+  },
+
+  create_post: [
+    body('title', '`title` cannot be empty').trim().notEmpty().escape(),
+    body('content', '`content` cannot be empty').trim().notEmpty().escape(),
+    (req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) res.status(400).json(errors.array());
+      const post = new Post({
+        title: req.body.title,
+        content: req.body.content,
+        author: req.user._id,
+        published: req.body.published
+      });
+      post.save((err, post) => {
+        if (err) return next(err);
+        res.status(201).json(post);
+      })
+    }
+  ]
 }
