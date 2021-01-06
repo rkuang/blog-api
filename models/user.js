@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
@@ -17,14 +18,15 @@ UserSchema.virtual('url').get(function() {
 });
 
 UserSchema.pre('save', function(next) {
-  const hash = this.password;
-
-  this.password = hash;
-  next();
+  bcrypt.hash(this.password, 10, (err, hash) => {
+    if (err) return next(err);
+    this.password = hash;
+    next();
+  });
 });
 
-UserSchema.methods.verifyPassword = function(password) {
-  return password === this.password;
+UserSchema.methods.verifyPassword = async function(password) {
+  return await bcrypt.compare(password, this.password);
 };
 
 module.exports = mongoose.model('User', UserSchema);
