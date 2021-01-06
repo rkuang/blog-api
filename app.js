@@ -2,6 +2,7 @@ require('dotenv').config()
 var createError = require('http-errors');
 var express = require('express');
 var logger = require('morgan');
+require('./auth/auth');
 
 var app = express();
 
@@ -19,10 +20,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 var routes = require('./routes');
+const passport = require('passport');
 
-app.use('/users', routes.users);
-app.use('/posts', routes.posts);
-app.use('/comments', routes.comments);
+app.use('/', routes.router);
+app.use('/users', passport.authenticate('jwt', { session: false }), routes.users);
+app.use('/posts', passport.authenticate('jwt', { session: false }), routes.posts);
+app.use('/comments', passport.authenticate('jwt', { session: false }), routes.comments);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -35,10 +38,7 @@ app.use(function(err, req, res, next) {
       err.kind === 'ObjectId' &&
       err.path === '_id' &&
       !mongoose.isValidObjectId(err.value)) {
-    res.status(404);
-    res.json({
-      message: 'Object not found.'
-    });
+    res.send(createError(404));
   } else {
     res.status(err.status || 500);
     res.send(err);
