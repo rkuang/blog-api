@@ -1,14 +1,11 @@
 var express = require('express');
 var router = express.Router();
 
-const Comment = require('../models/comment');
+const controller = require('../controllers/comment')
 
 /* GET comments listing. */
-router.get('/', function(req, res, next) {
-  Comment.find((err, comments) => {
-    if (err) return next(err);
-    res.json({ comments: comments });
-  })
-});
+router.get('/', controller.get_comment_list);
+
+router.get('/:id', controller.get_comment_detail);
 
 module.exports = router;

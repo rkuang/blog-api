@@ -1,14 +1,11 @@
 var express = require('express');
 var router = express.Router();
 
-const Post = require('../models/post');
+const controller = require('../controllers/post')
 
 /* GET posts listing. */
-router.get('/', function(req, res, next) {
-  Post.find((err, posts) => {
-    if (err) return next(err);
-    res.json({ posts: posts} );
-  });
-});
+router.get('/', controller.get_post_list);
+
+router.get('/:id', controller.get_post_detail);
 
 module.exports = router;
