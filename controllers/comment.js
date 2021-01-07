@@ -46,6 +46,25 @@ module.exports = {
     }
   ],
 
+  put_comment: [
+    body('content', '`content` cannot be empty').trim().notEmpty().escape(),
+    (req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) return res.status(400).json(errors.array());
+      Comment.findById(req.params.id).populate('author').exec((err, comment) => {
+        if (err) return next(err);
+        if (!comment) return next(createError(404));
+        if (comment.author.id !== req.user._id) return next(createError(403));
+        comment.content = req.body.content;
+        comment.author = comment.author.id;
+        comment.save((err, comment) => {
+          if (err) return next(err);
+          res.json(comment);
+        })
+      })
+    }
+  ],
+
   delete_comment: (req, res, next) => {
     Comment.findById(req.params.id).populate('author').exec((err, comment) => {
       if (err) return next(err);
