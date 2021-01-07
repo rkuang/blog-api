@@ -10,4 +10,6 @@ router.get('/:id', controller.get_comment_detail);
 
 router.post('/', controller.create_comment);
 
+router.delete('/:id', controller.delete_comment);
+
 module.exports = router;

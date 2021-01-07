@@ -44,5 +44,17 @@ module.exports = {
         });
       });
     }
-  ]
+  ],
+
+  delete_comment: (req, res, next) => {
+    Comment.findById(req.params.id).populate('author').exec((err, comment) => {
+      if (err) return next(err);
+      if (!comment) return next(createError(404));
+      if (comment.author.id !== req.user._id) return next(createError(403));
+      Comment.findByIdAndDelete(comment._id, (err, comment) => {
+        if (err) return next(err);
+        res.sendStatus(204);
+      })
+    })
+  }
 }
